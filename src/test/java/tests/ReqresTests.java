@@ -112,4 +112,24 @@ public class ReqresTests extends TestBase{
                 assertEquals("mentor", response.getJob());
     }
 
+
+    @Test
+    @DisplayName("Ээээксперимент")
+    void testTest() {
+        UpdateUserBodyLombokModel authData = new UpdateUserBodyLombokModel();
+        authData.setJob("mentor");
+
+        UpdateUserResponseLombokModel response = given(userUpdateRequestSpec)
+                .body(authData)
+
+                .when()
+                .patch()
+
+                .then()
+                .spec(userUpdateResponseSpec)
+                .extract().as((Type) UpdateUserResponseLombokModel.class);
+        assertEquals("morpheus", response.getName());
+        assertEquals("mentor", response.getJob());
+    }
+
 }
