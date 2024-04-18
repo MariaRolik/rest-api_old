@@ -32,5 +32,18 @@ public class UserSpec {
             .build();
 
 
+    public static RequestSpecification userUpdateRequestSpec = with()
+            .filter(withCustomTemplates())
+            .log().uri()
+            .log().body()
+            .log().headers()
+            .contentType(JSON)
+            .basePath("/api/users/2");
+
+    public static ResponseSpecification userUpdateResponseSpec = new ResponseSpecBuilder()
+            .expectStatusCode(200)
+            .log(STATUS)
+            .log(BODY)
+            .build();
 }
 

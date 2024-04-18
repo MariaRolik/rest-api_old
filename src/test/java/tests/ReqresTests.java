@@ -1,9 +1,6 @@
 package tests;
 
-import models.lombok.LoginBodyLombokModel;
-import models.lombok.LoginResponseLombokModel;
-import models.lombok.UserBodyLombokModel;
-import models.lombok.UserResponseLombokModel;
+import models.lombok.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
@@ -45,7 +42,7 @@ public class ReqresTests extends TestBase{
         authData.setName("morpheus");
         authData.setJob("leader");
 
-        UserResponseLombokModel response = given(userRequestSpec)
+        CreateUserResponseLombokModel response = given(userRequestSpec)
                 .body(authData)
 
                 .when()
@@ -53,18 +50,18 @@ public class ReqresTests extends TestBase{
 
                 .then()
                 .spec(userResponseSpec)
-                .extract().as((Type) UserResponseLombokModel.class);
+                .extract().as((Type) CreateUserResponseLombokModel.class);
                  assertEquals("morpheus", response.getName());
                  assertEquals("leader", response.getJob());
     }
 
 
     @Test
-    @DisplayName("Создание пользователя без обязательных полей")
+    @DisplayName("Создание пользователя с пустыми значениями")
     void createEmptyUserTest() {
         UserBodyLombokModel authData = new UserBodyLombokModel();
 
-        UserResponseLombokModel response = given(userRequestSpec)
+        CreateUserResponseLombokModel response = given(userRequestSpec)
                 .body(authData)
 
                 .when()
@@ -72,7 +69,47 @@ public class ReqresTests extends TestBase{
 
                 .then()
                 .spec(userBadResponseSpec)
-                .extract().as((Type) UserResponseLombokModel.class);
+                .extract().as((Type) CreateUserResponseLombokModel.class);
+    }
+
+    @Test
+    @DisplayName("Изменение профессии пользователя c put")
+    void updateUserWithPutTest() {
+        UserBodyLombokModel authData = new UserBodyLombokModel();
+        authData.setName("morpheus");
+        authData.setJob("captain");
+
+        UpdateUserResponseLombokModel response = given(userUpdateRequestSpec)
+                .body(authData)
+
+                .when()
+                .put()
+
+                .then()
+                .spec(userUpdateResponseSpec)
+                .extract().as((Type) UpdateUserResponseLombokModel.class);
+        assertEquals("morpheus", response.getName());
+        assertEquals("captain", response.getJob());
+    }
+
+    @Test
+    @DisplayName("Изменение профессии пользователя c patch")
+    void updateUserWithPatchTest() {
+        UserBodyLombokModel authData = new UserBodyLombokModel();
+        authData.setName("morpheus");
+        authData.setJob("mentor");
+
+        UpdateUserResponseLombokModel response = given(userUpdateRequestSpec)
+                .body(authData)
+
+                .when()
+                .patch()
+
+                .then()
+                .spec(userUpdateResponseSpec)
+                .extract().as((Type) UpdateUserResponseLombokModel.class);
+                assertEquals("morpheus", response.getName());
+                assertEquals("mentor", response.getJob());
     }
 
 }
