@@ -40,7 +40,7 @@ public class ReqresTests extends TestBase{
 
     @Test
     @DisplayName("Успешное создание пользователя")
-    void createUserCustomAllureTest() {
+    void createUserTest() {
         UserBodyLombokModel authData = new UserBodyLombokModel();
         authData.setName("morpheus");
         authData.setJob("leader");
@@ -61,7 +61,7 @@ public class ReqresTests extends TestBase{
 
     @Test
     @DisplayName("Создание пользователя без обязательных полей")
-    void createUser11Test() {
+    void createEmptyUserTest() {
         UserBodyLombokModel authData = new UserBodyLombokModel();
 
         UserResponseLombokModel response = given(userRequestSpec)
