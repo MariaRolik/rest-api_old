@@ -1,113 +1,78 @@
 package tests;
 
+import models.lombok.LoginBodyLombokModel;
+import models.lombok.LoginResponseLombokModel;
+import models.lombok.UserBodyLombokModel;
+import models.lombok.UserResponseLombokModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import java.lang.reflect.Type;
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
-import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static specs.LoginSpec.loginRequestSpec;
+import static specs.LoginSpec.loginResponseSpec;
+import static specs.UserSpec.*;
 
 
-public class ReqresTests {
+public class ReqresTests extends TestBase{
 
     @Test
-    @DisplayName("Авторизация")
-    void loginSuccessfulTest() {
-        String body = "{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }"; // BAD PRACTICE
+    void successfulLoginWithSpecsTest() {
+        LoginBodyLombokModel authData = new LoginBodyLombokModel();
+        authData.setEmail("eve.holt@reqres.in");
+        authData.setPassword("cityslicka");
 
-        given()
-                .contentType(JSON)
-                .body(body)
+        LoginResponseLombokModel response = step("Make request", ()->
+                given(loginRequestSpec)
+                        .body(authData)
+
+                        .when()
+                        .post()
+
+                        .then()
+                        .spec(loginResponseSpec)
+                        .extract().as(LoginResponseLombokModel.class));
+
+                step("Check response", ()->
+                assertEquals("QpwL5tke4Pnpja7X4", response.getToken()));
+    }
+
+    @Test
+    @DisplayName("Успешное создание пользователя")
+    void createUserCustomAllureTest() {
+        UserBodyLombokModel authData = new UserBodyLombokModel();
+        authData.setName("morpheus");
+        authData.setJob("leader");
+
+        UserResponseLombokModel response = given(userRequestSpec)
+                .body(authData)
+
                 .when()
-                .post("https://reqres.in/api/login")
+                .post()
+
                 .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath("schemas/success-login-schema.json"))
-                .body("token", is("QpwL5tke4Pnpja7X4"));
+                .spec(userResponseSpec)
+                .extract().as((Type) UserResponseLombokModel.class);
+                 assertEquals("morpheus", response.getName());
+                 assertEquals("leader", response.getJob());
     }
 
 
     @Test
-    @DisplayName("Создание пользователя")
-    void createTest() {
+    @DisplayName("Создание пользователя без обязательных полей")
+    void createUser11Test() {
+        UserBodyLombokModel authData = new UserBodyLombokModel();
 
-        String body = "{ \"name\": \"morpheus\", \"job\": \"leader\" }"; // BAD PRACTICE
+        UserResponseLombokModel response = given(userRequestSpec)
+                .body(authData)
 
-        given()
-                .log().uri()
-                .log().method()
-                .log().body()
-                .contentType(JSON)
-                .body(body)
                 .when()
-                .post("https://reqres.in/api/users")
+                .post()
+
                 .then()
-                .log().body()
-                .statusCode(201)
-                .body(matchesJsonSchemaInClasspath("schemas/create-schema.json"))
-                .body("name", is("morpheus"))
-                .body("job", is("leader"));
-
-    }
-
-
-    @Test
-    @DisplayName("Удаление пользователя")
-    void deleteUserTest() {
-        given()
-                .contentType(JSON)
-                .when()
-                .delete("https://reqres.in/api/users/2")
-                .then()
-                .statusCode(204);
-
-    }
-
-    @Test
-    @DisplayName("Проверка данных пользователя с id: 1")
-    void singleUserId1Test() {
-        given()
-                .log().uri()
-                .log().method()
-                .log().body()
-                .contentType(JSON)
-                .when()
-                .log().body()
-                .get("https://reqres.in/api/users/1")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath("schemas/single-user-schema.json"))
-                .body("data.id", is(1))
-                .body("data.email", is("george.bluth@reqres.in"))
-                .body("data.first_name", is("George"))
-                .body("data.last_name", is("Bluth"))
-                .body("data.avatar", is("https://reqres.in/img/faces/1-image.jpg"))
-                .body("support.url", is("https://reqres.in/#support-heading"))
-                .body("support.text", is("To keep ReqRes free, contributions towards server costs are appreciated!"));
-    }
-    @Test
-    @DisplayName("Проверка данных пользователя с id: 2")
-    void singleUserId2Test() {
-        given()
-                .log().uri()
-                .log().method()
-                .log().body()
-                .contentType(JSON)
-                .when()
-                .log().body()
-                .get("https://reqres.in/api/users/2")
-                .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath("schemas/single-user-schema.json"))
-                .body("data.id", is(2))
-                .body("data.email", is("janet.weaver@reqres.in"))
-                .body("data.first_name", is("Janet"))
-                .body("data.last_name", is("Weaver"))
-                .body("data.avatar", is("https://reqres.in/img/faces/2-image.jpg"))
-                .body("support.url", is("https://reqres.in/#support-heading"))
-                .body("support.text", is("To keep ReqRes free, contributions towards server costs are appreciated!"));
+                .spec(userBadResponseSpec)
+                .extract().as((Type) UserResponseLombokModel.class);
     }
 
 }
